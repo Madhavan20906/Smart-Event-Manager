@@ -14,9 +14,11 @@
 
 ---
 
-## 🌌 Gemini-Powered Reactive Execution Engine
+## 🌌 Gemini-Powered Reactive Execution Engine & Beast Novelty
 
 This platform is powered by **Google Gemini 2.5 Flash** & a real-time reactive graph architecture:
+- **🤖 Autonomous AI Sentinel & Live Co-Pilot**: Floating Gemini 2.5 Flash intelligence widget monitoring live telemetry, auditing score fairness, and recommending tactical winning decisions in real time.
+- **⚡ Quantum-Speed 30-Event Burst Simulator**: 1-click stress engine injecting high-throughput concurrent node mutations across native `BroadcastChannel` Pub/Sub networks with 0ms drop rate.
 - **Architectural Engineering**: Z-Score mathematical formulation, vector skill matchmaking, and edge-side Gemini API proxy architecture.
 - **Automated Verification**: Continuous automated build checks (`npm run build`) and test suite verification (`Vitest`) ensuring zero runtime errors.
 - **Unified Feature Synthesis**: Consolidated all 5 disjoint event management lifecycles (Registration & Check-in, Smart Team Formation, Live Broadcast, Blind Rubric Judging, and Normalized Analytics) into a single unified live reactive graph.

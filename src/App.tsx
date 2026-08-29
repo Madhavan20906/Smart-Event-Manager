@@ -7,6 +7,7 @@ import { OrganizerDashboard } from './components/Organizer/OrganizerDashboard';
 import { SplitDemoView } from './components/Demo/SplitDemoView';
 import { Toast } from './components/UI/Toast';
 import { LoginGate } from './components/Auth/LoginGate';
+import { AISentinelWidget } from './components/AI/AISentinelWidget';
 import { GraphEvent, Role } from './types';
 import { Activity, ShieldCheck, Radio } from 'lucide-react';
 
@@ -192,6 +193,18 @@ export const App: React.FC = () => {
           />
         )}
       </main>
+
+      {/* Autonomous AI Sentinel & Stress Simulator Assistant */}
+      <AISentinelWidget
+        activeRole={storeState.activeRole}
+        currentUser={currentAttendee}
+        attendeesCount={storeState.attendees.length}
+        checkedInCount={checkedInCount}
+        eventsCount={storeState.events.length}
+        teams={storeState.teams}
+        submissions={storeState.submissions}
+        scores={storeState.scores}
+      />
 
       {/* Real-Time Event Mutation Toast */}
       <Toast event={latestToastEvent} onClose={() => setLatestToastEvent(null)} />

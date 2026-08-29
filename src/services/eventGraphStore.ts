@@ -760,6 +760,26 @@ class EventGraphStore {
 
     return entries;
   }
+
+  /**
+   * Quantum-Speed Event Graph Burst Simulator.
+   * Simulates high-throughput concurrent event mutations across the Pub/Sub network.
+   */
+  public simulateBurstEvents(count: number = 25): void {
+    let fired = 0;
+    const interval = setInterval(() => {
+      fired++;
+      const randomAttendee = this.state.attendees[Math.floor(Math.random() * this.state.attendees.length)];
+      if (randomAttendee) {
+        const newStatus = randomAttendee.checkinStatus === 'Verified' ? 'Pending' : 'Verified';
+        this.verifyCheckin(randomAttendee.id, newStatus);
+      }
+
+      if (fired >= count) {
+        clearInterval(interval);
+      }
+    }, 40); // 25 mutations per second
+  }
 }
 
 export const eventGraphStore = new EventGraphStore();
