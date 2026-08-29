@@ -26,7 +26,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onAuthenticate }) => {
     });
   };
 
-  const handleGoogleSuccess = (credentialResponse: any) => {
+  const handleGoogleSuccess = (_credentialResponse: { credential?: string }) => {
     // Decode JWT or use fallback profile details
     setIsGoogleLoading(true);
     setTimeout(() => {

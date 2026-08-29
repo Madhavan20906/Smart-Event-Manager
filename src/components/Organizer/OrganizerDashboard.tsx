@@ -472,7 +472,7 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
                 <select
                   value={targetRole}
-                  onChange={e => setTargetRole(e.target.value as any)}
+                  onChange={e => setTargetRole(e.target.value as 'all' | 'participant' | 'judge')}
                   aria-label="Target role selection for broadcast announcement"
                   className="px-2.5 py-1 rounded-lg bg-surface border border-border text-xs text-gray-200 font-mono focus-visible:ring-2 focus-visible:ring-primary"
                 >

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { GraphEvent } from '../../types';
-import { Radio, X, Sparkles } from 'lucide-react';
+import { Radio, X } from 'lucide-react';
 
 interface ToastProps {
   event: GraphEvent | null;
@@ -24,10 +24,15 @@ export const Toast: React.FC<ToastProps> = ({ event, onClose }) => {
   if (!event || !visible) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slide-up max-w-sm">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      className="fixed bottom-6 right-6 z-50 animate-slide-up max-w-sm"
+    >
       <div className="bg-surface/95 border border-primary/50 shadow-glow-primary backdrop-blur-md rounded-2xl p-4 flex items-start space-x-3 text-white">
         <div className="p-2 rounded-xl bg-primary/20 text-primary flex-shrink-0">
-          <Radio className="w-5 h-5 animate-pulse" />
+          <Radio className="w-5 h-5 animate-pulse" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
@@ -39,9 +44,11 @@ export const Toast: React.FC<ToastProps> = ({ event, onClose }) => {
                 setVisible(false);
                 onClose();
               }}
-              className="text-gray-400 hover:text-white"
+              aria-label="Close real-time mutation toast notification"
+              title="Close notification"
+              className="text-gray-400 hover:text-white p-1 rounded hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           </div>
           <p className="text-xs text-gray-200 font-sans leading-relaxed">

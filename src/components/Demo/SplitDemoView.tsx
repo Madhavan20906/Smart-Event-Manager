@@ -27,9 +27,29 @@ interface SplitDemoViewProps {
   currentJudge: Attendee;
   onVerifyCheckin: (attendeeId: string) => void;
   onRequestJoinTeam: (teamId: string, attendeeId: string) => void;
-  onSubmitProject: (payload: any) => void;
-  onSubmitScore: (payload: any) => void;
-  onCreateAnnouncement: (payload: any) => void;
+  onSubmitProject: (payload: {
+    submissionId?: string;
+    teamId: string;
+    projectTitle: string;
+    description: string;
+    demoUrl: string;
+    githubUrl: string;
+  }) => void;
+  onSubmitScore: (payload: {
+    judgeId: string;
+    judgeName: string;
+    submissionId: string;
+    teamId: string;
+    rubricScores: { innovation: number; execution: number; impact: number; presentation: number };
+    feedback: string;
+    aiSummary?: string;
+  }) => void;
+  onCreateAnnouncement: (payload: {
+    text: string;
+    bulletPoints?: string;
+    urgent: boolean;
+    targetRole: 'all' | 'participant' | 'judge';
+  }) => void;
 }
 
 export const SplitDemoView: React.FC<SplitDemoViewProps> = (props) => {

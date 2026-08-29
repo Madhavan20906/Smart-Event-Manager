@@ -304,10 +304,25 @@ class EventGraphStore {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Schema validation guard to ensure data shape integrity
+        if (
+          parsed &&
+          Array.isArray(parsed.attendees) &&
+          Array.isArray(parsed.teams) &&
+          Array.isArray(parsed.submissions) &&
+          Array.isArray(parsed.scores) &&
+          Array.isArray(parsed.announcements) &&
+          Array.isArray(parsed.events)
+        ) {
+          return {
+            ...parsed,
+            events: parsed.events.slice(0, 100),
+          };
+        }
       }
     } catch (err) {
-      console.warn('Failed to read from localStorage:', err);
+      console.warn('Failed to read or parse from localStorage, falling back to seed baseline:', err);
     }
     return {
       attendees: INITIAL_ATTENDEES,
@@ -324,6 +339,8 @@ class EventGraphStore {
 
   private saveToStorage() {
     try {
+      // Keep events bounded to max 100 entries to prevent memory/storage inflation
+      this.state.events = this.state.events.slice(0, 100);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
     } catch (err) {
       console.warn('Failed to save to localStorage:', err);
@@ -352,12 +369,11 @@ class EventGraphStore {
   }
 
   public setActiveRole(role: Role) {
-    this.state.activeRole = role;
-    if (role === 'judge') {
-      this.state.currentUserId = 'att-3'; // Marcus Vance
-    } else if (role === 'participant') {
-      this.state.currentUserId = 'att-1'; // Alex Chen
-    }
+    this.state = {
+      ...this.state,
+      activeRole: role,
+      currentUserId: role === 'judge' ? 'att-3' : role === 'participant' ? 'att-1' : this.state.currentUserId,
+    };
     this.saveToStorage();
     this.notify();
   }
@@ -368,7 +384,10 @@ class EventGraphStore {
     const attendee = this.state.attendees.find(a => a.id === attendeeId);
     if (!attendee) return;
 
-    attendee.checkinStatus = 'Verified';
+    // Immutable attendee status mutation
+    this.state.attendees = this.state.attendees.map(a =>
+      a.id === attendeeId ? { ...a, checkinStatus: 'Verified' as const } : a
+    );
 
     const mutationEvent: GraphEvent = {
       id: `evt-${Date.now()}`,
@@ -379,7 +398,7 @@ class EventGraphStore {
       timestamp: Date.now(),
     };
 
-    this.state.events.unshift(mutationEvent);
+    this.state.events = [mutationEvent, ...this.state.events].slice(0, 100);
     this.saveToStorage();
     this.notify(mutationEvent);
   }

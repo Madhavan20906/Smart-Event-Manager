@@ -86,7 +86,7 @@ export interface GraphEvent {
   entityId: string;
   description: string;
   timestamp: number;
-  payload?: any;
+  payload?: Record<string, unknown>;
 }
 
 export interface LeaderboardEntry {
