@@ -2,7 +2,6 @@
 
 > **"One Live Event Graph. Zero Polling. Absolute Fairness. Powered by Google Gemini 2.5 Flash & Mathematical AI."**
 
-[![Antigravity Agentic AI](https://img.shields.io/badge/Built_with-Antigravity_Agentic_AI-8E44AD?logo=google&logoColor=white)](#-antigravity-native-agentic-execution)
 [![React 18](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![TypeScript 5.7](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite 6.1](https://img.shields.io/badge/Vite-6.1-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -15,12 +14,12 @@
 
 ---
 
-## 🌌 Antigravity Native Agentic Execution
+## 🌌 Gemini-Powered Reactive Execution Engine
 
-This platform was built exclusively using **Antigravity**, the Google DeepMind agentic AI environment:
-- **Architectural Engineering**: Multi-agent task planning, Z-Score mathematical formulation, and edge-side Gemini API proxy architecture executed autonomously.
-- **Agentic Verification**: Continuous automated build checks (`npm run build`) and test suite verification (`Vitest`) ensuring zero runtime errors.
-- **Unified Feature Synthesis**: Consolidated all 5 disjoint event management lifecycles (Registration & Check-in, Smart Team Formation, Live Broadcast, Blind Rubric Judging, and Normalized Analytics) into a unified live reactive graph within 3 hours.
+This platform is powered by **Google Gemini 2.5 Flash** & a real-time reactive graph architecture:
+- **Architectural Engineering**: Z-Score mathematical formulation, vector skill matchmaking, and edge-side Gemini API proxy architecture.
+- **Automated Verification**: Continuous automated build checks (`npm run build`) and test suite verification (`Vitest`) ensuring zero runtime errors.
+- **Unified Feature Synthesis**: Consolidated all 5 disjoint event management lifecycles (Registration & Check-in, Smart Team Formation, Live Broadcast, Blind Rubric Judging, and Normalized Analytics) into a single unified live reactive graph.
 
 ---
 

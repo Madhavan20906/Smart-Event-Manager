@@ -48,7 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
               <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-300 border border-purple-500/40 hidden sm:inline-flex items-center space-x-1">
                 <Sparkles className="w-3 h-3 text-purple-400" />
-                <span>ANTIGRAVITY AI ENGINE</span>
+                <span>GEMINI 2.5 AI ENGINE</span>
               </span>
             </div>
             <p className="text-xs text-gray-400 font-mono hidden sm:block">
