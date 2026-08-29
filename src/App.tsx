@@ -6,12 +6,18 @@ import { JudgeDashboard } from './components/Judge/JudgeDashboard';
 import { OrganizerDashboard } from './components/Organizer/OrganizerDashboard';
 import { SplitDemoView } from './components/Demo/SplitDemoView';
 import { Toast } from './components/UI/Toast';
+import { LoginGate } from './components/Auth/LoginGate';
 import { GraphEvent, Role } from './types';
-import { Activity, ShieldCheck, Github, ExternalLink, Radio } from 'lucide-react';
+import { Activity, ShieldCheck, Radio } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [storeState, setStoreState] = useState<EventGraphState>(eventGraphStore.getState());
   const [latestToastEvent, setLatestToastEvent] = useState<GraphEvent | null>(null);
+  const [authenticatedUser, setAuthenticatedUser] = useState<{
+    name: string;
+    email: string;
+    role: Role;
+  } | null>(null);
 
   useEffect(() => {
     const unsubscribe = eventGraphStore.subscribe((newState) => {
@@ -23,10 +29,12 @@ export const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Keyboard shortcut listener for fast demo switching
+  // Keyboard shortcut listener gated behind VITE_DEMO_MODE=true env flag
   useEffect(() => {
+    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === 'true';
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey) {
+      if (e.altKey && isDemoMode) {
         if (e.key === '1') eventGraphStore.setActiveRole('participant');
         if (e.key === '2') eventGraphStore.setActiveRole('judge');
         if (e.key === '3') eventGraphStore.setActiveRole('organizer');
@@ -37,6 +45,11 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleAuthenticate = (user: { name: string; email: string; role: Role }) => {
+    setAuthenticatedUser(user);
+    eventGraphStore.setActiveRole(user.role);
+  };
+
   const currentAttendee = storeState.attendees.find(a => a.id === storeState.currentUserId) || storeState.attendees[0];
   const currentJudge = storeState.attendees.find(a => a.id === 'att-3') || storeState.attendees[2]; // Marcus Vance
   const leaderboard = eventGraphStore.getLeaderboard();
@@ -44,6 +57,11 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans selection:bg-primary selection:text-white">
+      {/* Login Gate Authorization Check */}
+      {!authenticatedUser && (
+        <LoginGate onAuthenticate={handleAuthenticate} />
+      )}
+
       {/* Top Header Navigation */}
       <Navbar
         activeRole={storeState.activeRole}

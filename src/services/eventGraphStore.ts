@@ -423,14 +423,25 @@ class EventGraphStore {
     rubricScores: { innovation: number; execution: number; impact: number; presentation: number };
     feedback: string;
     aiSummary?: string;
+    isOutlier?: boolean;
+    outlierNote?: string;
   }): Score {
-    const rawTotal = payload.rubricScores.innovation + 
-                     payload.rubricScores.execution + 
-                     payload.rubricScores.impact + 
-                     payload.rubricScores.presentation;
+    // 1. Input Validation
+    const { innovation, execution, impact, presentation } = payload.rubricScores;
+    const scoresArray = [innovation, execution, impact, presentation];
+
+    if (scoresArray.some(s => typeof s !== 'number' || s < 0 || s > 10 || !Number.isInteger(s))) {
+      throw new Error('Invalid rubric score: All criteria must be integers between 0 and 10.');
+    }
+
+    if (!payload.submissionId || !payload.teamId) {
+      throw new Error('Invalid store write: submissionId and teamId are required.');
+    }
+
+    const rawTotal = innovation + execution + impact + presentation;
 
     const newScore: Score = {
-      id: `score-${Date.now()}`,
+      id: `score-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       judgeId: payload.judgeId,
       judgeName: payload.judgeName,
       submissionId: payload.submissionId,
@@ -438,8 +449,10 @@ class EventGraphStore {
       rubricScores: payload.rubricScores,
       rawTotal,
       zScore: 0, // Recalibrated below
-      feedback: payload.feedback,
+      feedback: payload.feedback || 'Evaluated score',
       aiSummary: payload.aiSummary,
+      isOutlier: payload.isOutlier,
+      outlierNote: payload.outlierNote,
       timestamp: Date.now(),
     };
 
@@ -453,6 +466,17 @@ class EventGraphStore {
     // Recalibrate all scores for this judge to update Z-scores dynamically
     this.state.scores = recalibrateJudgeScores(this.state.scores, payload.judgeId);
 
+    // Re-fetch updated score with recalibrated Z-score
+    const updatedScore = this.state.scores.find(s => s.id === newScore.id) || newScore;
+
+    // Check if score magnitude exceeds 1.5 Z-score threshold for outlier flagging
+    if (Math.abs(updatedScore.zScore) > 1.5) {
+      updatedScore.isOutlier = true;
+      if (!updatedScore.outlierNote) {
+        updatedScore.outlierNote = `Notable outlier (${updatedScore.zScore > 0 ? '+' : ''}${updatedScore.zScore} Z-Score) relative to judge panel baseline.`;
+      }
+    }
+
     // Update submission status to Judged
     const submission = this.state.submissions.find(s => s.id === payload.submissionId);
     if (submission) {
@@ -465,8 +489,8 @@ class EventGraphStore {
       id: `evt-${Date.now()}`,
       type: 'SCORE_SUBMITTED',
       entityType: 'Score',
-      entityId: newScore.id,
-      description: `Blind Score submitted for ${team?.code || 'Team'} by Judge → Panel Z-Score updated instantly.`,
+      entityId: updatedScore.id,
+      description: `Blind Score submitted for ${team?.code || 'Team'} by Judge → Panel Z-Score updated instantly (${updatedScore.zScore > 0 ? '+' : ''}${updatedScore.zScore}).${updatedScore.isOutlier ? ' [⚠️ AI OUTLIER FLAGGED]' : ''}`,
       timestamp: Date.now(),
     };
 
@@ -474,7 +498,7 @@ class EventGraphStore {
     this.saveToStorage();
     this.notify(mutationEvent);
 
-    return newScore;
+    return updatedScore;
   }
 
   public createAnnouncement(payload: {

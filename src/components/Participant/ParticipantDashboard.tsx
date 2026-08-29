@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import confetti from 'canvas-confetti';
 import { Attendee, Team, Submission, Announcement, JoinRequest } from '../../types';
 import { calculateSkillMatch } from '../../utils/math';
+import { QRScannerModal } from './QRScannerModal';
 import {
   QrCode,
   CheckCircle2,
@@ -15,7 +17,8 @@ import {
   Code2,
   Layers,
   ChevronRight,
-  ShieldAlert
+  ShieldAlert,
+  Camera
 } from 'lucide-react';
 
 interface ParticipantDashboardProps {
@@ -46,6 +49,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
   onSubmitProject,
 }) => {
   const [activeTab, setActiveTab] = useState<'discovery' | 'submission' | 'announcements'>('discovery');
+  const [showScannerModal, setShowScannerModal] = useState(false);
   const [submissionForm, setSubmissionForm] = useState({
     projectTitle: '',
     description: '',
@@ -71,6 +75,18 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
     };
   }).sort((a, b) => b.matchPercentage - a.matchPercentage);
 
+  const handleScanCodeSuccess = (code: string) => {
+    setShowScannerModal(false);
+    onVerifyCheckin(currentAttendee.id);
+
+    // Fire canvas-confetti burst on successful checkin
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
   const handleSubmitProjectForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!myTeam) return;
@@ -85,6 +101,14 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
+      {/* Camera Scanner Modal */}
+      {showScannerModal && (
+        <QRScannerModal
+          onScanSuccess={handleScanCodeSuccess}
+          onClose={() => setShowScannerModal(false)}
+        />
+      )}
+
       {/* Top Banner: Welcome & QR Check-in Wallet */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Attendee Profile & Status */}
@@ -96,7 +120,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-secondary p-0.5 shadow-glow-primary">
                 <img
                   src={currentAttendee.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentAttendee.name}`}
-                  alt={currentAttendee.name}
+                  alt={`Profile avatar image for attendee ${currentAttendee.name}`}
                   className="w-full h-full object-cover rounded-[14px]"
                 />
               </div>
@@ -107,18 +131,18 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
                     Participant Node
                   </span>
                 </div>
-                <p className="text-sm text-gray-400 font-mono mt-0.5">{currentAttendee.email}</p>
+                <p className="text-sm text-gray-300 font-mono mt-0.5">{currentAttendee.email}</p>
               </div>
             </div>
 
             {/* Skill Tags */}
             <div className="mb-4">
-              <span className="text-xs font-mono text-gray-400 block mb-2">My Skill Vector:</span>
+              <span className="text-xs font-mono text-gray-300 block mb-2">My Skill Vector:</span>
               <div className="flex flex-wrap gap-1.5">
                 {currentAttendee.skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2.5 py-1 text-xs font-mono rounded-lg bg-surface-hover border border-border text-gray-200"
+                    className="px-2.5 py-1 text-xs font-mono rounded-lg bg-surface-hover border border-border text-gray-100"
                   >
                     ⚡ {skill}
                   </span>
@@ -130,7 +154,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
           {/* Real-time Status Card */}
           <div className="pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
-              <span className="text-xs font-mono text-gray-400">Node Status:</span>
+              <span className="text-xs font-mono text-gray-300">Node Status:</span>
               {currentAttendee.checkinStatus === 'Verified' ? (
                 <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-accent/20 text-accent border border-accent/40 shadow-glow-accent">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -154,7 +178,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
         {/* QR Check-in Wallet Card */}
         <div className="bg-card border border-border/80 rounded-2xl p-6 shadow-glass flex flex-col items-center justify-center text-center space-y-4 relative">
-          <div className="flex items-center space-x-2 text-xs font-mono text-gray-400">
+          <div className="flex items-center space-x-2 text-xs font-mono text-gray-300">
             <QrCode className="w-4 h-4 text-primary" />
             <span>ENTRY WALLET QR</span>
           </div>
@@ -168,18 +192,19 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
             />
           </div>
 
-          <p className="text-[11px] font-mono text-gray-400">
-            ID: <span className="text-gray-200">{currentAttendee.qrCode}</span>
+          <p className="text-[11px] font-mono text-gray-300">
+            ID: <span className="text-gray-100">{currentAttendee.qrCode}</span>
           </p>
 
-          {/* Interactive Check-in Trigger for Live Demo */}
+          {/* Camera QR Scanner Trigger */}
           {currentAttendee.checkinStatus === 'Pending' ? (
             <button
-              onClick={() => onVerifyCheckin(currentAttendee.id)}
-              className="w-full py-2 px-4 rounded-xl bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white font-semibold text-xs transition-all shadow-glow-accent flex items-center justify-center space-x-2"
+              onClick={() => setShowScannerModal(true)}
+              aria-label="Scan Entry QR Code using Camera"
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white font-semibold text-xs transition-all shadow-glow-accent flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Simulate Scan & Verify Entry</span>
+              <Camera className="w-4 h-4" />
+              <span>Scan QR Code with Camera</span>
             </button>
           ) : (
             <div className="w-full py-2 px-4 rounded-xl bg-accent/10 border border-accent/30 text-accent font-semibold text-xs flex items-center justify-center space-x-2">
@@ -354,7 +379,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
                 {/* Card Action */}
                 <div className="pt-4 border-t border-border/60 flex items-center justify-between">
-                  <span className="text-xs font-mono text-gray-400">
+                  <span className="text-xs font-mono text-gray-300">
                     Members: {team.memberIds.length} enrolled
                   </span>
 
@@ -369,7 +394,8 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
                   ) : (
                     <button
                       onClick={() => onRequestJoinTeam(team.id, currentAttendee.id)}
-                      className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-all shadow-glow-primary flex items-center space-x-1.5"
+                      aria-label={`Request to join team node ${team.code} (${team.name})`}
+                      className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-all shadow-glow-primary flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       <span>Request to Join Node</span>

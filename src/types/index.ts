@@ -43,6 +43,8 @@ export interface Score {
   zScore: number;
   feedback: string;
   aiSummary?: string;
+  isOutlier?: boolean;
+  outlierNote?: string;
   timestamp: number;
 }
 

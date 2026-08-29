@@ -120,7 +120,7 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
                 FAIRNESS PROTOCOL ENFORCED
               </span>
             </div>
-            <p className="text-xs text-gray-400 font-mono mt-0.5">
+            <p className="text-xs text-gray-300 font-mono mt-0.5">
               Team names & participant identities are anonymized to team codes. Raw scores are z-score normalized automatically.
             </p>
           </div>
@@ -158,7 +158,8 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
                 <button
                   key={sub.id}
                   onClick={() => handleSelectSubmission(sub.id)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                  aria-label={`Evaluate submission for team code ${sub.teamCode}`}
+                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between focus-visible:ring-2 focus-visible:ring-primary ${
                     isSelected
                       ? 'bg-primary/10 border-primary shadow-glow-primary'
                       : 'bg-card border-border hover:border-gray-700'
@@ -238,93 +239,110 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
             </div>
 
             <form onSubmit={handleSubmitScore} className="space-y-6">
-              {/* Sliders Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Innovation */}
-                <div className="bg-surface p-4 rounded-xl border border-border space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <label className="font-mono font-bold text-gray-200">Innovation & Novelty</label>
-                    <span className="font-mono font-bold text-primary text-sm">{rubric.innovation} / 10</span>
+              {/* Rubric Criteria Sliders */}
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="rubric-innovation-slider" className="text-xs font-mono text-gray-300 font-semibold">
+                      1. Innovation & Novelty (0–10)
+                    </label>
+                    <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/20">
+                      {rubric.innovation}/10
+                    </span>
                   </div>
                   <input
+                    id="rubric-innovation-slider"
                     type="range"
                     min="0"
                     max="10"
                     step="1"
                     value={rubric.innovation}
                     onChange={e => setRubric({ ...rubric, innovation: Number(e.target.value) })}
-                    className="w-full accent-primary cursor-pointer"
+                    aria-label="Innovation and Novelty Rubric Slider (0 to 10)"
+                    className="w-full accent-primary bg-surface h-2 rounded-lg cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
                   />
-                  <p className="text-[11px] text-gray-400">Uniqueness of solution, creative use of graph events & AI.</p>
                 </div>
 
-                {/* Execution */}
-                <div className="bg-surface p-4 rounded-xl border border-border space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <label className="font-mono font-bold text-gray-200">Technical Execution</label>
-                    <span className="font-mono font-bold text-primary text-sm">{rubric.execution} / 10</span>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="rubric-execution-slider" className="text-xs font-mono text-gray-300 font-semibold">
+                      2. Technical Execution & Architecture (0–10)
+                    </label>
+                    <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/20">
+                      {rubric.execution}/10
+                    </span>
                   </div>
                   <input
+                    id="rubric-execution-slider"
                     type="range"
                     min="0"
                     max="10"
                     step="1"
                     value={rubric.execution}
                     onChange={e => setRubric({ ...rubric, execution: Number(e.target.value) })}
-                    className="w-full accent-primary cursor-pointer"
+                    aria-label="Technical Execution Rubric Slider (0 to 10)"
+                    className="w-full accent-primary bg-surface h-2 rounded-lg cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
                   />
-                  <p className="text-[11px] text-gray-400">Code quality, performance, and architecture integrity.</p>
                 </div>
 
-                {/* Impact */}
-                <div className="bg-surface p-4 rounded-xl border border-border space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <label className="font-mono font-bold text-gray-200">Real-World Impact</label>
-                    <span className="font-mono font-bold text-primary text-sm">{rubric.impact} / 10</span>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="rubric-impact-slider" className="text-xs font-mono text-gray-300 font-semibold">
+                      3. Practical Impact & Market Need (0–10)
+                    </label>
+                    <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/20">
+                      {rubric.impact}/10
+                    </span>
                   </div>
                   <input
+                    id="rubric-impact-slider"
                     type="range"
                     min="0"
                     max="10"
                     step="1"
                     value={rubric.impact}
                     onChange={e => setRubric({ ...rubric, impact: Number(e.target.value) })}
-                    className="w-full accent-primary cursor-pointer"
+                    aria-label="Practical Impact Rubric Slider (0 to 10)"
+                    className="w-full accent-primary bg-surface h-2 rounded-lg cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
                   />
-                  <p className="text-[11px] text-gray-400">Practical utility and scalability for attendees & organizers.</p>
                 </div>
 
-                {/* Presentation */}
-                <div className="bg-surface p-4 rounded-xl border border-border space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <label className="font-mono font-bold text-gray-200">Presentation & UI</label>
-                    <span className="font-mono font-bold text-primary text-sm">{rubric.presentation} / 10</span>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="rubric-presentation-slider" className="text-xs font-mono text-gray-300 font-semibold">
+                      4. Presentation & Pitch Delivery (0–10)
+                    </label>
+                    <span className="text-xs font-mono font-bold text-primary px-2 py-0.5 rounded bg-primary/20">
+                      {rubric.presentation}/10
+                    </span>
                   </div>
                   <input
+                    id="rubric-presentation-slider"
                     type="range"
                     min="0"
                     max="10"
                     step="1"
                     value={rubric.presentation}
                     onChange={e => setRubric({ ...rubric, presentation: Number(e.target.value) })}
-                    className="w-full accent-primary cursor-pointer"
+                    aria-label="Presentation Pitch Rubric Slider (0 to 10)"
+                    className="w-full accent-primary bg-surface h-2 rounded-lg cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
                   />
-                  <p className="text-[11px] text-gray-400">Clarity of demo, UI responsiveness, and micro-interactions.</p>
                 </div>
               </div>
 
               {/* Feedback Textarea */}
               <div>
-                <label className="block text-xs font-mono text-gray-300 mb-1.5 flex items-center space-x-1.5">
+                <label htmlFor="judge-feedback-textarea" className="block text-xs font-mono text-gray-300 mb-1.5 flex items-center space-x-1.5">
                   <MessageSquare className="w-3.5 h-3.5 text-primary" />
                   <span>Structured Judge Feedback</span>
                 </label>
                 <textarea
+                  id="judge-feedback-textarea"
                   rows={3}
                   placeholder="Provide objective feedback on strengths, architecture, and improvements..."
                   value={feedback}
                   onChange={e => setFeedback(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-surface border border-border text-white text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-4 py-2.5 rounded-xl bg-surface border border-border text-white text-sm focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </div>
 
@@ -347,7 +365,8 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="py-3 px-6 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-glow-primary flex items-center justify-center space-x-2 disabled:opacity-50"
+                  aria-label="Submit score and propagate Z-score normalization"
+                  className="py-3 px-6 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-glow-primary flex items-center justify-center space-x-2 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <Send className="w-4 h-4" />
                   <span>{isSubmitting ? 'Normalizing Score...' : 'Submit & Propagate to Leaderboard'}</span>

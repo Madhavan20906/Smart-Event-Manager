@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import confetti from 'canvas-confetti';
 import {
   Attendee,
   Team,
@@ -35,7 +36,8 @@ import {
   Radio,
   FileText,
   Zap,
-  HelpCircle
+  HelpCircle,
+  AlertTriangle
 } from 'lucide-react';
 
 interface OrganizerDashboardProps {
@@ -69,6 +71,20 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
   const [isUrgent, setIsUrgent] = useState(false);
   const [targetRole, setTargetRole] = useState<'all' | 'participant' | 'judge'>('all');
   const [isExpandingAI, setIsExpandingAI] = useState(false);
+  const prevRankOneRef = useRef<string | null>(null);
+
+  // Trigger confetti when rank #1 team shifts
+  useEffect(() => {
+    const topTeam = leaderboard[0]?.teamId;
+    if (topTeam && prevRankOneRef.current && prevRankOneRef.current !== topTeam) {
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.4 },
+      });
+    }
+    prevRankOneRef.current = topTeam || null;
+  }, [leaderboard]);
 
   // Computations for live stat tiles
   const checkedInAttendees = attendees.filter(a => a.checkinStatus === 'Verified').length;
@@ -283,9 +299,20 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
                       {/* Team Code */}
                       <td className="py-4 px-4 font-mono">
-                        <span className="px-2 py-1 rounded bg-surface border border-border text-primary font-bold">
-                          {entry.teamCode}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2 py-1 rounded bg-surface border border-border text-primary font-bold">
+                            {entry.teamCode}
+                          </span>
+                          {entry.scores.some(s => s.isOutlier) && (
+                            <span
+                              title={entry.scores.find(s => s.isOutlier)?.outlierNote || 'Outlier score flagged'}
+                              className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-danger/20 text-danger border border-danger/40 flex items-center space-x-1 animate-pulse"
+                            >
+                              <AlertTriangle className="w-3 h-3 text-danger" />
+                              <span>AI Outlier Flagged</span>
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Project Title & AI Tooltip Summary */}
@@ -409,23 +436,25 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                 type="button"
                 onClick={handleExpandWithGemini}
                 disabled={isExpandingAI || !bulletInput.trim()}
-                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-secondary to-primary hover:from-primary hover:to-secondary text-white text-xs font-bold transition-all shadow-glow-primary flex items-center justify-center space-x-1.5 disabled:opacity-50"
+                aria-label="Expand raw bullet points with Gemini AI"
+                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-secondary to-primary hover:from-primary hover:to-secondary text-white text-xs font-bold transition-all shadow-glow-primary flex items-center justify-center space-x-1.5 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{isExpandingAI ? 'Expanding with Gemini AI...' : 'Expand Bullets with Gemini AI'}</span>
               </button>
 
               <div>
-                <label className="block text-xs font-mono text-gray-400 mb-1">
+                <label htmlFor="final-broadcast-textarea" className="block text-xs font-mono text-gray-300 mb-1">
                   Step 2: Final Broadcast Text
                 </label>
                 <textarea
+                  id="final-broadcast-textarea"
                   rows={3}
                   required
                   placeholder="Final broadcast announcement message..."
                   value={announcementText}
                   onChange={e => setAnnouncementText(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-surface border border-border text-white text-xs focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-surface border border-border text-white text-xs focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </div>
 
@@ -435,7 +464,8 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                     type="checkbox"
                     checked={isUrgent}
                     onChange={e => setIsUrgent(e.target.checked)}
-                    className="accent-danger rounded"
+                    aria-label="Mark announcement as urgent banner"
+                    className="accent-danger rounded focus-visible:ring-2 focus-visible:ring-primary"
                   />
                   <span className={isUrgent ? 'text-danger font-bold' : ''}>Mark as Urgent Banner</span>
                 </label>
@@ -443,7 +473,8 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
                 <select
                   value={targetRole}
                   onChange={e => setTargetRole(e.target.value as any)}
-                  className="px-2.5 py-1 rounded-lg bg-surface border border-border text-xs text-gray-200 font-mono"
+                  aria-label="Target role selection for broadcast announcement"
+                  className="px-2.5 py-1 rounded-lg bg-surface border border-border text-xs text-gray-200 font-mono focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <option value="all">Target: All Roles</option>
                   <option value="participant">Target: Participants</option>
@@ -453,7 +484,8 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-all shadow-glow-primary flex items-center justify-center space-x-2"
+                aria-label="Publish announcement to live graph"
+                className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-all shadow-glow-primary flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Publish Announcement Node</span>
