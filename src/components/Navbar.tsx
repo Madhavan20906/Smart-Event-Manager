@@ -57,8 +57,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Active Authenticated Node User Badge */}
           {currentUser && (
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-card border border-border text-xs">
-              <div className="w-6 h-6 rounded-full overflow-hidden bg-primary/20 border border-primary/30">
+            <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-card border border-border text-xs shadow-sm">
+              <div className="w-6 h-6 rounded-full overflow-hidden bg-primary/20 border border-primary/30 shrink-0">
                 <img
                   src={currentUser.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.name}`}
                   alt={`Avatar image for logged in user ${currentUser.name}`}
@@ -69,11 +69,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               {onLogout && (
                 <button
                   onClick={onLogout}
-                  title="Switch Identity Node / Logout"
+                  title="Logout & Switch Account Node"
                   aria-label="Logout and switch authenticated identity node"
-                  className="text-gray-400 hover:text-danger ml-1 p-1 rounded hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+                  className="flex items-center space-x-1 px-2 py-0.5 rounded-lg bg-danger/15 hover:bg-danger/30 border border-danger/40 text-danger-light text-[11px] font-mono font-semibold transition-all focus-visible:ring-2 focus-visible:ring-primary ml-1"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
+                  <LogOut className="w-3 h-3" />
+                  <span>Logout</span>
                 </button>
               )}
             </div>

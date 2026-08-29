@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Role } from '../../types';
+import { eventGraphStore } from '../../services/eventGraphStore';
 import {
   Shield,
   Users,
@@ -16,7 +17,8 @@ import {
   Fingerprint,
   Radio,
   Check,
-  Zap
+  Zap,
+  AlertTriangle
 } from 'lucide-react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
@@ -62,6 +64,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onAuthenticate }) => {
   ]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationProgress, setVerificationProgress] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills(prev =>
@@ -77,6 +80,7 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onAuthenticate }) => {
   }) => {
     setIsVerifying(true);
     setVerificationProgress(0);
+    setErrorMessage(null);
 
     // Cryptographic Zero-Knowledge Token simulation animation
     const interval = setInterval(() => {
@@ -96,17 +100,36 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onAuthenticate }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+
     if (!email.trim()) return;
     if (mode === 'register' && !name.trim()) return;
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+
+    // Check duplicate account in register mode
+    if (mode === 'register') {
+      const attendees = eventGraphStore.getState().attendees;
+      const existingByEmail = attendees.find(a => a.email.toLowerCase() === cleanEmail);
+      const existingByName = attendees.find(a => a.name.toLowerCase() === cleanName.toLowerCase());
+
+      if (existingByEmail || existingByName) {
+        setErrorMessage(
+          `Account already exists for ${existingByEmail ? cleanEmail : cleanName}! Please switch to 'Authenticate Session' to sign in.`
+        );
+        return;
+      }
+    }
+
     const finalName =
       mode === 'register'
-        ? name.trim()
+        ? cleanName
         : email.split('@')[0].replace('.', ' ').toUpperCase();
 
     handleExecuteAuth({
       name: finalName,
-      email: email.trim(),
+      email: cleanEmail,
       role: selectedRole,
       skills: selectedSkills,
     });
@@ -422,6 +445,25 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onAuthenticate }) => {
                   </button>
                 </div>
               </div>
+
+              {errorMessage && (
+                <div className="bg-danger/20 border border-danger/50 p-3 rounded-xl text-xs font-mono text-danger flex items-start space-x-2 animate-pulse">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold">{errorMessage}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode('login');
+                        setErrorMessage(null);
+                      }}
+                      className="block underline font-bold mt-1 text-white hover:text-danger-light"
+                    >
+                      Switch to Authenticate Session (Sign In) →
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
