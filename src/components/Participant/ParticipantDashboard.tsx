@@ -98,7 +98,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
   const handleScanCodeSuccess = (code: string) => {
     setShowScannerModal(false);
-    onVerifyCheckin(currentAttendee.id);
+    onVerifyCheckin(code.trim() || currentAttendee.id);
 
     // Fire canvas-confetti burst on successful checkin
     confetti({
@@ -219,18 +219,37 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
           {/* Camera QR Scanner Trigger */}
           {currentAttendee.checkinStatus === 'Pending' ? (
-            <button
-              onClick={() => setShowScannerModal(true)}
-              aria-label="Scan Entry QR Code using Camera"
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white font-semibold text-xs transition-all shadow-glow-accent flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <Camera className="w-4 h-4" />
-              <span>Scan QR Code with Camera</span>
-            </button>
+            <div className="w-full space-y-2">
+              <button
+                onClick={() => setShowScannerModal(true)}
+                aria-label="Scan Entry QR Code using Camera"
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white font-semibold text-xs transition-all shadow-glow-accent flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+                <span>Scan QR Code with Camera</span>
+              </button>
+              <button
+                onClick={() => onVerifyCheckin(currentAttendee.id)}
+                aria-label="Instant self check-in"
+                className="w-full py-1.5 px-3 rounded-lg bg-surface hover:bg-surface-hover border border-border text-gray-300 text-[11px] font-mono transition-all flex items-center justify-center space-x-1 cursor-pointer"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                <span>Instant Self Check-in</span>
+              </button>
+            </div>
           ) : (
-            <div className="w-full py-2 px-4 rounded-xl bg-accent/10 border border-accent/30 text-accent font-semibold text-xs flex items-center justify-center space-x-2">
-              <CheckCircle2 className="w-4 h-4 text-accent" />
-              <span>Checked-in Live in Event Graph</span>
+            <div className="w-full space-y-2">
+              <div className="w-full py-2 px-4 rounded-xl bg-accent/10 border border-accent/30 text-accent font-semibold text-xs flex items-center justify-center space-x-2">
+                <CheckCircle2 className="w-4 h-4 text-accent" />
+                <span>Checked-in Live in Event Graph</span>
+              </div>
+              <button
+                onClick={() => onVerifyCheckin(currentAttendee.id)}
+                aria-label="Toggle check-in status"
+                className="w-full py-1 px-2 text-[11px] font-mono text-gray-400 hover:text-white underline cursor-pointer"
+              >
+                Toggle Status back to Pending
+              </button>
             </div>
           )}
         </div>

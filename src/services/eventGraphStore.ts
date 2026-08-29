@@ -445,21 +445,37 @@ class EventGraphStore {
 
   // --- MUTATIONS ---
 
-  public verifyCheckin(attendeeId: string) {
-    const attendee = this.state.attendees.find(a => a.id === attendeeId);
-    if (!attendee) return;
+  public verifyCheckin(identifier: string, targetStatus?: 'Verified' | 'Pending') {
+    const cleanId = identifier.trim().toLowerCase();
+    const attendee = this.state.attendees.find(
+      a =>
+        a.id.toLowerCase() === cleanId ||
+        a.qrCode.toLowerCase() === cleanId ||
+        a.email.toLowerCase() === cleanId
+    );
+    if (!attendee) {
+      console.warn(`[verifyCheckin] No attendee found matching identifier "${identifier}"`);
+      return;
+    }
+
+    const nextStatus: 'Verified' | 'Pending' =
+      targetStatus !== undefined
+        ? targetStatus
+        : attendee.checkinStatus === 'Verified'
+        ? 'Pending'
+        : 'Verified';
 
     // Immutable attendee status mutation
     this.state.attendees = this.state.attendees.map(a =>
-      a.id === attendeeId ? { ...a, checkinStatus: 'Verified' as const } : a
+      a.id === attendee.id ? { ...a, checkinStatus: nextStatus } : a
     );
 
     const mutationEvent: GraphEvent = {
       id: `evt-${Date.now()}`,
       type: 'ATTENDEE_CHECKIN',
       entityType: 'Attendee',
-      entityId: attendeeId,
-      description: `Attendee ${attendee.name} scanned QR → Status mutated to Verified.`,
+      entityId: attendee.id,
+      description: `Attendee "${attendee.name}" (${attendee.email}) check-in mutated → Status: ${nextStatus}.`,
       timestamp: Date.now(),
     };
 

@@ -148,6 +148,7 @@ export const App: React.FC = () => {
             events={storeState.events}
             leaderboard={leaderboard}
             onCreateAnnouncement={payload => eventGraphStore.createAnnouncement(payload)}
+            onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
           />
         )}
 

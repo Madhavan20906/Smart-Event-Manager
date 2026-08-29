@@ -155,6 +155,7 @@ export const SplitDemoView: React.FC<SplitDemoViewProps> = (props) => {
             events={props.events}
             leaderboard={props.leaderboard}
             onCreateAnnouncement={props.onCreateAnnouncement}
+            onVerifyCheckin={props.onVerifyCheckin}
           />
         </div>
       </div>
