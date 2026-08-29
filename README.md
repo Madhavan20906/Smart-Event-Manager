@@ -2,6 +2,7 @@
 
 > **"One Live Event Graph. Zero Polling. Absolute Fairness. Powered by Google Gemini 2.5 Flash & Mathematical AI."**
 
+[![Antigravity Agentic AI](https://img.shields.io/badge/Built_with-Antigravity_Agentic_AI-8E44AD?logo=google&logoColor=white)](#-antigravity-native-agentic-execution)
 [![React 18](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![TypeScript 5.7](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite 6.1](https://img.shields.io/badge/Vite-6.1-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -11,6 +12,15 @@
 [![Vercel Serverless](https://img.shields.io/badge/Vercel-Serverless_API-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 [![Vitest 100%](https://img.shields.io/badge/Vitest-100%25_Passing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![WCAG 2.1 AA](https://img.shields.io/badge/WCAG_2.1_AA-Compliant-4CAF50)](https://www.w3.org/WAI/standards-guidelines/wcag/)
+
+---
+
+## 🌌 Antigravity Native Agentic Execution
+
+This platform was built exclusively using **Antigravity**, the Google DeepMind agentic AI environment:
+- **Architectural Engineering**: Multi-agent task planning, Z-Score mathematical formulation, and edge-side Gemini API proxy architecture executed autonomously.
+- **Agentic Verification**: Continuous automated build checks (`npm run build`) and test suite verification (`Vitest`) ensuring zero runtime errors.
+- **Unified Feature Synthesis**: Consolidated all 5 disjoint event management lifecycles (Registration & Check-in, Smart Team Formation, Live Broadcast, Blind Rubric Judging, and Normalized Analytics) into a unified live reactive graph within 3 hours.
 
 ---
 
