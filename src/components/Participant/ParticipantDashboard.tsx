@@ -33,7 +33,7 @@ interface ParticipantDashboardProps {
   announcements: Announcement[];
   joinRequests: JoinRequest[];
   userRole?: Role;
-  onElevateRole?: (newRole: Role) => void;
+  onRedirectToMyDashboard?: () => void;
   onVerifyCheckin: (attendeeId: string) => void;
   onRequestJoinTeam: (teamId: string, attendeeId: string) => void;
   onSubmitProject: (payload: {
@@ -52,11 +52,21 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
   announcements,
   joinRequests,
   userRole = 'participant',
-  onElevateRole,
+  onRedirectToMyDashboard,
   onVerifyCheckin,
   onRequestJoinTeam,
   onSubmitProject,
 }) => {
+  if (userRole !== 'participant' && userRole !== 'demo') {
+    return (
+      <RoleGuardBanner
+        userRole={userRole}
+        requiredRole="participant"
+        onRedirectToMyDashboard={onRedirectToMyDashboard}
+      />
+    );
+  }
+
   const isReadOnly = userRole !== 'participant' && userRole !== 'demo';
   const [activeTab, setActiveTab] = useState<'discovery' | 'submission' | 'announcements'>('discovery');
   const [showScannerModal, setShowScannerModal] = useState(false);
@@ -129,8 +139,7 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
-      {/* Role Access Authorization Banner */}
-      <RoleGuardBanner userRole={userRole} requiredRole="participant" onElevateRole={onElevateRole} />
+
 
       {/* Camera Scanner Modal */}
       {showScannerModal && (

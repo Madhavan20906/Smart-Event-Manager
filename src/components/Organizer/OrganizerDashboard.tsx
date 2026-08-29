@@ -60,7 +60,7 @@ interface OrganizerDashboardProps {
   events: GraphEvent[];
   leaderboard: LeaderboardEntry[];
   userRole?: Role;
-  onElevateRole?: (newRole: Role) => void;
+  onRedirectToMyDashboard?: () => void;
   onCreateAnnouncement: (payload: {
     text: string;
     bulletPoints?: string;
@@ -79,10 +79,20 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
   events,
   leaderboard,
   userRole = 'organizer',
-  onElevateRole,
+  onRedirectToMyDashboard,
   onCreateAnnouncement,
   onVerifyCheckin,
 }) => {
+  if (userRole !== 'organizer' && userRole !== 'demo') {
+    return (
+      <RoleGuardBanner
+        userRole={userRole}
+        requiredRole="organizer"
+        onRedirectToMyDashboard={onRedirectToMyDashboard}
+      />
+    );
+  }
+
   const isReadOnly = userRole !== 'organizer' && userRole !== 'demo';
   const [activeOrgTab, setActiveOrgTab] = useState<'leaderboard' | 'attendance'>('leaderboard');
   const [showOrgScannerModal, setShowOrgScannerModal] = useState(false);
@@ -120,7 +130,7 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
     { stage: 'Registered', count: attendees.length, fill: '#6366f1' },
     { stage: 'Checked In', count: checkedInAttendees, fill: '#06b6d4' },
     { stage: 'Teams Formed', count: teams.length * 2, fill: '#10b981' },
-    { stage: 'Submitted', count: submissions.length, fill: '#f59e0b' },
+    { stage: 'Submissions', count: submissions.length, fill: '#f59e0b' },
     { stage: 'Judged', count: submissions.filter(s => s.status === 'Judged').length, fill: '#ec4899' },
   ];
 
@@ -186,8 +196,7 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
-      {/* Role Access Authorization Banner */}
-      <RoleGuardBanner userRole={userRole} requiredRole="organizer" onElevateRole={onElevateRole} />
+
 
       {/* Camera QR Scanner Modal for Organizer */}
       {showOrgScannerModal && (

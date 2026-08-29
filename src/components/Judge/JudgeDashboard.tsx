@@ -23,7 +23,7 @@ interface JudgeDashboardProps {
   scores: Score[];
   teams: Team[];
   userRole?: Role;
-  onElevateRole?: (newRole: Role) => void;
+  onRedirectToMyDashboard?: () => void;
   onSubmitScore: (payload: {
     judgeId: string;
     judgeName: string;
@@ -41,9 +41,19 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
   scores,
   teams,
   userRole = 'judge',
-  onElevateRole,
+  onRedirectToMyDashboard,
   onSubmitScore,
 }) => {
+  if (userRole !== 'judge' && userRole !== 'demo') {
+    return (
+      <RoleGuardBanner
+        userRole={userRole}
+        requiredRole="judge"
+        onRedirectToMyDashboard={onRedirectToMyDashboard}
+      />
+    );
+  }
+
   const isReadOnly = userRole !== 'judge' && userRole !== 'demo';
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string>(
     submissions[0]?.id || ''
@@ -113,8 +123,7 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
-      {/* Role Access Authorization Banner */}
-      <RoleGuardBanner userRole={userRole} requiredRole="judge" onElevateRole={onElevateRole} />
+
 
       {/* Header: Blind Judging Protocol Banner */}
       <div className="bg-gradient-to-r from-card via-surface to-card border border-border/80 rounded-2xl p-6 shadow-glass flex flex-col md:flex-row md:items-center justify-between gap-4">

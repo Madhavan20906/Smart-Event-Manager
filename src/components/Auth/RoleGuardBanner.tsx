@@ -1,17 +1,17 @@
 import React from 'react';
 import { Role } from '../../types';
-import { Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 
 interface RoleGuardBannerProps {
   userRole?: Role;
   requiredRole: Role;
-  onElevateRole?: (newRole: Role) => void;
+  onRedirectToMyDashboard?: () => void;
 }
 
 export const RoleGuardBanner: React.FC<RoleGuardBannerProps> = ({
   userRole = 'participant',
   requiredRole,
-  onElevateRole,
+  onRedirectToMyDashboard,
 }) => {
   if (userRole === requiredRole || userRole === 'demo') {
     return null;
@@ -25,41 +25,46 @@ export const RoleGuardBanner: React.FC<RoleGuardBannerProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-r from-amber-950/70 via-amber-900/40 to-amber-950/70 border border-amber-500/60 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-amber-200 animate-slide-up mb-6">
-      <div className="flex items-start space-x-3.5">
-        <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 shrink-0 mt-0.5">
-          <Lock className="w-5 h-5" />
+    <div className="min-h-[60vh] flex items-center justify-center p-4">
+      <div className="bg-card border border-red-500/50 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-6 animate-slide-up">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-500/20 text-red-400 border border-red-500/40 shadow-glow-primary">
+          <ShieldAlert className="w-8 h-8 text-red-400" />
         </div>
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className="font-bold text-white text-sm font-sans tracking-tight">
-              🔒 READ-ONLY MODE — Authorization Guard
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold uppercase">
-              Logged in: {roleLabels[userRole] || userRole}
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-300 border border-red-500/30 font-bold uppercase">
-              Requires: {roleLabels[requiredRole] || requiredRole}
-            </span>
-          </div>
-          <p className="text-xs text-amber-200/90 font-mono leading-relaxed">
-            You are currently authenticated as a <strong className="text-white">{roleLabels[userRole]}</strong>. This view is visible for browsing, but write/mutation privileges are restricted to <strong className="text-white">{roleLabels[requiredRole]}</strong> accounts.
+
+        <div className="space-y-2">
+          <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/30 inline-block">
+            403 ACCESS RESTRICTED
+          </span>
+          <h2 className="text-2xl font-bold text-white tracking-tight">
+            Not Authorized for This View
+          </h2>
+          <p className="text-xs text-gray-300 font-mono leading-relaxed">
+            Your account is authenticated as <strong className="text-white">{roleLabels[userRole] || userRole}</strong>. 
+            Cross-role browsing is restricted to enforce strict blind judging standards and data isolation.
           </p>
         </div>
-      </div>
 
-      {onElevateRole && (
-        <button
-          type="button"
-          onClick={() => onElevateRole(requiredRole)}
-          aria-label={`Switch authorized role to ${roleLabels[requiredRole]}`}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs font-mono transition-all shadow-md shrink-0 flex items-center space-x-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400"
-        >
-          <ShieldCheck className="w-4 h-4 text-black" />
-          <span>Authorize as {roleLabels[requiredRole]}</span>
-          <ArrowRight className="w-3.5 h-3.5 text-black" />
-        </button>
-      )}
+        <div className="bg-surface p-3 rounded-xl border border-border text-left text-xs font-mono space-y-1">
+          <div className="text-gray-400">
+            Authenticated Role: <span className="text-white font-bold">{roleLabels[userRole]}</span>
+          </div>
+          <div className="text-gray-400">
+            Requested Category: <span className="text-red-400 font-bold">{roleLabels[requiredRole]}</span>
+          </div>
+        </div>
+
+        {onRedirectToMyDashboard && (
+          <button
+            type="button"
+            onClick={onRedirectToMyDashboard}
+            className="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs font-mono transition-all shadow-glow-primary flex items-center justify-center space-x-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to My Authorized Dashboard ({roleLabels[userRole]})</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 };
+

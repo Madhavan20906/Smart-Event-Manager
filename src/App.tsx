@@ -41,17 +41,20 @@ export const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Sync saved auth user into store on mount
+  const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === 'true';
+
+  // Sync saved auth user into store on mount and keep activeRole locked to user's assigned role unless in demo mode
   useEffect(() => {
     if (authenticatedUser) {
       eventGraphStore.registerOrLoginUser(authenticatedUser);
+      if (!isDemoMode) {
+        eventGraphStore.setActiveRole(authenticatedUser.role);
+      }
     }
-  }, []);
+  }, [authenticatedUser]);
 
-  // Keyboard shortcut listener gated behind VITE_DEMO_MODE=true env flag
+  // Keyboard shortcut listener gated strictly behind VITE_DEMO_MODE=true env flag
   useEffect(() => {
-    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === 'true';
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && isDemoMode) {
         if (e.key === '1') eventGraphStore.setActiveRole('participant');
@@ -77,6 +80,7 @@ export const App: React.FC = () => {
       console.warn('Failed to save auth user to storage:', err);
     }
     eventGraphStore.registerOrLoginUser(user);
+    eventGraphStore.setActiveRole(user.role);
   };
 
   const handleLogout = () => {
@@ -88,25 +92,18 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleElevateUserRole = (newRole: Role) => {
-    if (!authenticatedUser) return;
-    const updatedUser = { ...authenticatedUser, role: newRole };
-    setAuthenticatedUser(updatedUser);
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
-    } catch (err) {
-      console.warn('Failed to update auth storage:', err);
-    }
-    eventGraphStore.registerOrLoginUser(updatedUser);
-    eventGraphStore.setActiveRole(newRole);
-  };
-
   const currentAttendee =
     storeState.attendees.find(a => a.id === storeState.currentUserId) || storeState.attendees[0];
   const currentJudge =
     storeState.attendees.find(a => a.id === 'att-3') || storeState.attendees[2]; // Marcus Vance
   const leaderboard = eventGraphStore.getLeaderboard();
   const checkedInCount = storeState.attendees.filter(a => a.checkinStatus === 'Verified').length;
+
+  const handleRedirectToMyDashboard = () => {
+    if (authenticatedUser) {
+      eventGraphStore.setActiveRole(authenticatedUser.role);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans selection:bg-primary selection:text-white">
@@ -138,7 +135,7 @@ export const App: React.FC = () => {
             announcements={storeState.announcements}
             joinRequests={storeState.joinRequests}
             userRole={authenticatedUser.role}
-            onElevateRole={handleElevateUserRole}
+            onRedirectToMyDashboard={handleRedirectToMyDashboard}
             onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
             onRequestJoinTeam={(tId, aId) => eventGraphStore.requestJoinTeam(tId, aId)}
             onSubmitProject={payload => eventGraphStore.updateSubmission(payload)}
@@ -152,7 +149,7 @@ export const App: React.FC = () => {
             scores={storeState.scores}
             teams={storeState.teams}
             userRole={authenticatedUser.role}
-            onElevateRole={handleElevateUserRole}
+            onRedirectToMyDashboard={handleRedirectToMyDashboard}
             onSubmitScore={payload => eventGraphStore.submitScore(payload)}
           />
         )}
@@ -167,13 +164,13 @@ export const App: React.FC = () => {
             events={storeState.events}
             leaderboard={leaderboard}
             userRole={authenticatedUser.role}
-            onElevateRole={handleElevateUserRole}
+            onRedirectToMyDashboard={handleRedirectToMyDashboard}
             onCreateAnnouncement={payload => eventGraphStore.createAnnouncement(payload)}
             onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
           />
         )}
 
-        {storeState.activeRole === 'demo' && (
+        {storeState.activeRole === 'demo' && isDemoMode && (
           <SplitDemoView
             attendees={storeState.attendees}
             teams={storeState.teams}
@@ -217,11 +214,13 @@ export const App: React.FC = () => {
             <span>EventPulse — Real-Time Live Event Graph Management Engine</span>
           </div>
 
-          <div className="flex items-center space-x-4 text-gray-400">
-            <span className="px-2 py-0.5 rounded bg-card border border-border text-[11px]">
-              Shortcut: Alt+1 (Part) • Alt+2 (Judge) • Alt+3 (Org) • Alt+4 (Split)
-            </span>
-          </div>
+          {isDemoMode && (
+            <div className="flex items-center space-x-4 text-gray-400">
+              <span className="px-2 py-0.5 rounded bg-card border border-border text-[11px]">
+                Shortcut: Alt+1 (Part) • Alt+2 (Judge) • Alt+3 (Org) • Alt+4 (Split)
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2 text-gray-400">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />

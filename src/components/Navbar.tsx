@@ -100,71 +100,63 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Check-ins: <strong className="text-accent">{checkedInCount}/{totalAttendees}</strong></span>
           </div>
 
-          {/* Role Navigation Pills */}
-          <nav className="flex items-center p-1 rounded-xl bg-card border border-border shadow-inner">
-            <button
-              onClick={() => onRoleChange('participant')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeRole === 'participant'
-                  ? 'bg-primary text-white shadow-glow-primary font-bold'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>Participant</span>
-              {userRole !== 'participant' && userRole !== 'demo' && (
-                <span title="Read-Only Mode for your current authenticated role">
-                  <Lock className="w-3 h-3 text-amber-400" />
-                </span>
-              )}
-            </button>
+          {/* Role Navigation Pills (Only visible in Demo Mode when VITE_DEMO_MODE=true) */}
+          {(import.meta as any).env?.VITE_DEMO_MODE === 'true' ? (
+            <nav className="flex items-center p-1 rounded-xl bg-card border border-border shadow-inner">
+              <button
+                onClick={() => onRoleChange('participant')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeRole === 'participant'
+                    ? 'bg-primary text-white shadow-glow-primary font-bold'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Participant</span>
+              </button>
 
-            <button
-              onClick={() => onRoleChange('judge')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeRole === 'judge'
-                  ? 'bg-primary text-white shadow-glow-primary font-bold'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
-              }`}
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>Blind Judge</span>
-              {userRole !== 'judge' && userRole !== 'demo' && (
-                <span title="Read-Only Mode for your current authenticated role">
-                  <Lock className="w-3 h-3 text-amber-400" />
-                </span>
-              )}
-            </button>
+              <button
+                onClick={() => onRoleChange('judge')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeRole === 'judge'
+                    ? 'bg-primary text-white shadow-glow-primary font-bold'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
+                }`}
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span>Blind Judge</span>
+              </button>
 
-            <button
-              onClick={() => onRoleChange('organizer')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeRole === 'organizer'
-                  ? 'bg-primary text-white shadow-glow-primary font-bold'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
-              }`}
-            >
-              <Shield className="w-3.5 h-3.5" />
-              <span>Organizer</span>
-              {userRole !== 'organizer' && userRole !== 'demo' && (
-                <span title="Read-Only Mode for your current authenticated role">
-                  <Lock className="w-3 h-3 text-amber-400" />
-                </span>
-              )}
-            </button>
+              <button
+                onClick={() => onRoleChange('organizer')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeRole === 'organizer'
+                    ? 'bg-primary text-white shadow-glow-primary font-bold'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>Organizer</span>
+              </button>
 
-            <button
-              onClick={() => onRoleChange('demo')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeRole === 'demo'
-                  ? 'bg-gradient-to-r from-secondary to-accent text-white font-semibold shadow-glow-accent'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              <span>Demo Split</span>
-            </button>
-          </nav>
+              <button
+                onClick={() => onRoleChange('demo')}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeRole === 'demo'
+                    ? 'bg-gradient-to-r from-secondary to-accent text-white font-semibold shadow-glow-accent'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Demo Split</span>
+              </button>
+            </nav>
+          ) : (
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-card border border-border text-xs font-mono text-gray-200">
+              <Shield className="w-3.5 h-3.5 text-accent" />
+              <span>Authorized Dashboard: <strong className="text-white uppercase">{userRole}</strong></span>
+            </div>
+          )}
 
           {/* Reset Baseline Seed Data Button */}
           <button
