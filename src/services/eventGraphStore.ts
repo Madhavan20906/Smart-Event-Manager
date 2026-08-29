@@ -372,10 +372,75 @@ class EventGraphStore {
     this.state = {
       ...this.state,
       activeRole: role,
-      currentUserId: role === 'judge' ? 'att-3' : role === 'participant' ? 'att-1' : this.state.currentUserId,
     };
     this.saveToStorage();
     this.notify();
+  }
+
+  public registerOrLoginUser(payload: {
+    name: string;
+    email: string;
+    role: Role;
+    skills?: string[];
+    avatarUrl?: string;
+  }): Attendee {
+    const cleanEmail = payload.email.trim().toLowerCase();
+    const cleanName = payload.name.trim();
+
+    // Check if attendee already exists in graph
+    let attendee = this.state.attendees.find(a => a.email.toLowerCase() === cleanEmail);
+
+    if (attendee) {
+      // Update existing attendee role and name if changed
+      this.state.attendees = this.state.attendees.map(a =>
+        a.id === attendee!.id
+          ? {
+              ...a,
+              name: cleanName,
+              role: payload.role,
+              skills: payload.skills && payload.skills.length > 0 ? payload.skills : a.skills,
+              avatarUrl: payload.avatarUrl || a.avatarUrl,
+            }
+          : a
+      );
+      attendee = this.state.attendees.find(a => a.id === attendee!.id)!;
+    } else {
+      // Create new Attendee Node
+      const newId = `att-user-${Date.now()}`;
+      const codeName = cleanName.toUpperCase().replace(/[^A-Z0-9]/g, '-').substring(0, 12);
+      attendee = {
+        id: newId,
+        name: cleanName,
+        email: cleanEmail,
+        role: payload.role,
+        skills: payload.skills && payload.skills.length > 0 ? payload.skills : ['React', 'TypeScript', 'Node.js', 'AI Prompting'],
+        checkinStatus: 'Pending',
+        qrCode: `EVTP-ATT-${codeName}-${Math.floor(1000 + Math.random() * 9000)}`,
+        avatarUrl: payload.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cleanName)}`,
+      };
+      this.state.attendees = [attendee, ...this.state.attendees];
+    }
+
+    this.state = {
+      ...this.state,
+      currentUserId: attendee.id,
+      activeRole: payload.role,
+    };
+
+    const mutationEvent: GraphEvent = {
+      id: `evt-${Date.now()}`,
+      type: 'ATTENDEE_REGISTERED',
+      entityType: 'Attendee',
+      entityId: attendee.id,
+      description: `Authenticated node identity "${attendee.name}" (${attendee.email}) joined graph as ${payload.role}.`,
+      timestamp: Date.now(),
+    };
+
+    this.state.events = [mutationEvent, ...this.state.events].slice(0, 100);
+    this.saveToStorage();
+    this.notify(mutationEvent);
+
+    return attendee;
   }
 
   // --- MUTATIONS ---

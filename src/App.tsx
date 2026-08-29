@@ -10,6 +10,8 @@ import { LoginGate } from './components/Auth/LoginGate';
 import { GraphEvent, Role } from './types';
 import { Activity, ShieldCheck, Radio } from 'lucide-react';
 
+const AUTH_STORAGE_KEY = 'EVENTPULSE_AUTH_USER_V1';
+
 export const App: React.FC = () => {
   const [storeState, setStoreState] = useState<EventGraphState>(eventGraphStore.getState());
   const [latestToastEvent, setLatestToastEvent] = useState<GraphEvent | null>(null);
@@ -17,7 +19,16 @@ export const App: React.FC = () => {
     name: string;
     email: string;
     role: Role;
-  } | null>(null);
+    skills?: string[];
+  } | null>(() => {
+    try {
+      const saved = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (err) {
+      console.warn('Failed to parse auth user from storage:', err);
+    }
+    return null;
+  });
 
   useEffect(() => {
     const unsubscribe = eventGraphStore.subscribe((newState) => {
@@ -27,6 +38,13 @@ export const App: React.FC = () => {
       }
     });
     return () => unsubscribe();
+  }, []);
+
+  // Sync saved auth user into store on mount
+  useEffect(() => {
+    if (authenticatedUser) {
+      eventGraphStore.registerOrLoginUser(authenticatedUser);
+    }
   }, []);
 
   // Keyboard shortcut listener gated behind VITE_DEMO_MODE=true env flag
@@ -45,22 +63,41 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleAuthenticate = (user: { name: string; email: string; role: Role }) => {
+  const handleAuthenticate = (user: {
+    name: string;
+    email: string;
+    role: Role;
+    skills?: string[];
+  }) => {
     setAuthenticatedUser(user);
-    eventGraphStore.setActiveRole(user.role);
+    try {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    } catch (err) {
+      console.warn('Failed to save auth user to storage:', err);
+    }
+    eventGraphStore.registerOrLoginUser(user);
   };
 
-  const currentAttendee = storeState.attendees.find(a => a.id === storeState.currentUserId) || storeState.attendees[0];
-  const currentJudge = storeState.attendees.find(a => a.id === 'att-3') || storeState.attendees[2]; // Marcus Vance
+  const handleLogout = () => {
+    setAuthenticatedUser(null);
+    try {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } catch (err) {
+      console.warn('Failed to clear auth storage:', err);
+    }
+  };
+
+  const currentAttendee =
+    storeState.attendees.find(a => a.id === storeState.currentUserId) || storeState.attendees[0];
+  const currentJudge =
+    storeState.attendees.find(a => a.id === 'att-3') || storeState.attendees[2]; // Marcus Vance
   const leaderboard = eventGraphStore.getLeaderboard();
   const checkedInCount = storeState.attendees.filter(a => a.checkinStatus === 'Verified').length;
 
   return (
     <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans selection:bg-primary selection:text-white">
       {/* Login Gate Authorization Check */}
-      {!authenticatedUser && (
-        <LoginGate onAuthenticate={handleAuthenticate} />
-      )}
+      {!authenticatedUser && <LoginGate onAuthenticate={handleAuthenticate} />}
 
       {/* Top Header Navigation */}
       <Navbar
@@ -70,6 +107,8 @@ export const App: React.FC = () => {
         onResetData={() => eventGraphStore.resetStore()}
         checkedInCount={checkedInCount}
         totalAttendees={storeState.attendees.length}
+        currentUser={currentAttendee}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -81,9 +120,9 @@ export const App: React.FC = () => {
             submissions={storeState.submissions}
             announcements={storeState.announcements}
             joinRequests={storeState.joinRequests}
-            onVerifyCheckin={(id) => eventGraphStore.verifyCheckin(id)}
+            onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
             onRequestJoinTeam={(tId, aId) => eventGraphStore.requestJoinTeam(tId, aId)}
-            onSubmitProject={(payload) => eventGraphStore.updateSubmission(payload)}
+            onSubmitProject={payload => eventGraphStore.updateSubmission(payload)}
           />
         )}
 
@@ -93,7 +132,7 @@ export const App: React.FC = () => {
             submissions={storeState.submissions}
             scores={storeState.scores}
             teams={storeState.teams}
-            onSubmitScore={(payload) => eventGraphStore.submitScore(payload)}
+            onSubmitScore={payload => eventGraphStore.submitScore(payload)}
           />
         )}
 
@@ -106,7 +145,7 @@ export const App: React.FC = () => {
             announcements={storeState.announcements}
             events={storeState.events}
             leaderboard={leaderboard}
-            onCreateAnnouncement={(payload) => eventGraphStore.createAnnouncement(payload)}
+            onCreateAnnouncement={payload => eventGraphStore.createAnnouncement(payload)}
           />
         )}
 
@@ -122,11 +161,11 @@ export const App: React.FC = () => {
             joinRequests={storeState.joinRequests}
             currentAttendee={currentAttendee}
             currentJudge={currentJudge}
-            onVerifyCheckin={(id) => eventGraphStore.verifyCheckin(id)}
+            onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
             onRequestJoinTeam={(tId, aId) => eventGraphStore.requestJoinTeam(tId, aId)}
-            onSubmitProject={(payload) => eventGraphStore.updateSubmission(payload)}
-            onSubmitScore={(payload) => eventGraphStore.submitScore(payload)}
-            onCreateAnnouncement={(payload) => eventGraphStore.createAnnouncement(payload)}
+            onSubmitProject={payload => eventGraphStore.updateSubmission(payload)}
+            onSubmitScore={payload => eventGraphStore.submitScore(payload)}
+            onCreateAnnouncement={payload => eventGraphStore.createAnnouncement(payload)}
           />
         )}
       </main>

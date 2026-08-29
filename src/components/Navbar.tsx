@@ -1,6 +1,6 @@
 import React from 'react';
-import { Role } from '../types';
-import { Activity, Shield, Users, Award, Radio, RefreshCw, Layers } from 'lucide-react';
+import { Role, Attendee } from '../types';
+import { Activity, Shield, Users, Award, Radio, RefreshCw, Layers, LogOut } from 'lucide-react';
 
 interface NavbarProps {
   activeRole: Role;
@@ -9,6 +9,8 @@ interface NavbarProps {
   onResetData: () => void;
   checkedInCount: number;
   totalAttendees: number;
+  currentUser?: Attendee;
+  onLogout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -18,6 +20,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onResetData,
   checkedInCount,
   totalAttendees,
+  currentUser,
+  onLogout,
 }) => {
   return (
     <header className="sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-border/80 px-4 lg:px-8 py-3 transition-all">
@@ -51,6 +55,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Live Status & Role Switcher */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Active Authenticated Node User Badge */}
+          {currentUser && (
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-card border border-border text-xs">
+              <div className="w-6 h-6 rounded-full overflow-hidden bg-primary/20 border border-primary/30">
+                <img
+                  src={currentUser.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.name}`}
+                  alt={`Avatar image for logged in user ${currentUser.name}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="font-bold text-white font-sans truncate max-w-[120px]">{currentUser.name}</span>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  title="Switch Identity Node / Logout"
+                  aria-label="Logout and switch authenticated identity node"
+                  className="text-gray-400 hover:text-danger ml-1 p-1 rounded hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Live Node Mutation Counter */}
           <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-card border border-border text-xs font-mono text-gray-300">
             <Radio className="w-3.5 h-3.5 text-accent animate-pulse" />
@@ -117,7 +145,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={onResetData}
             title="Reset Event Graph to Baseline Seed Data"
-            className="p-2 rounded-lg bg-card border border-border text-gray-400 hover:text-white hover:bg-surface-hover transition-colors"
+            aria-label="Reset Event Graph to Baseline Seed Data"
+            className="p-2 rounded-lg bg-card border border-border text-gray-400 hover:text-white hover:bg-surface-hover transition-colors focus-visible:ring-2 focus-visible:ring-primary"
           >
             <RefreshCw className="w-4 h-4" />
           </button>

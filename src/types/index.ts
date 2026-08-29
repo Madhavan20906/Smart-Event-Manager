@@ -72,6 +72,7 @@ export interface Announcement {
 
 export type EventMutationType =
   | 'ATTENDEE_CHECKIN'
+  | 'ATTENDEE_REGISTERED'
   | 'TEAM_FORMED'
   | 'JOIN_REQUEST'
   | 'SUBMISSION_UPDATED'
