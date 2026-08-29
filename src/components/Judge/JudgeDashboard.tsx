@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Submission, Score, Team, Attendee } from '../../types';
+import { Submission, Score, Team, Attendee, Role } from '../../types';
 import { calculateZScore } from '../../utils/math';
 import { summarizeJudgeFeedbackWithGemini } from '../../services/geminiService';
+import { RoleGuardBanner } from '../Auth/RoleGuardBanner';
 import {
   Award,
   EyeOff,
@@ -21,6 +22,8 @@ interface JudgeDashboardProps {
   submissions: Submission[];
   scores: Score[];
   teams: Team[];
+  userRole?: Role;
+  onElevateRole?: (newRole: Role) => void;
   onSubmitScore: (payload: {
     judgeId: string;
     judgeName: string;
@@ -37,8 +40,11 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
   submissions,
   scores,
   teams,
+  userRole = 'judge',
+  onElevateRole,
   onSubmitScore,
 }) => {
+  const isReadOnly = userRole !== 'judge' && userRole !== 'demo';
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string>(
     submissions[0]?.id || ''
   );
@@ -107,6 +113,9 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
+      {/* Role Access Authorization Banner */}
+      <RoleGuardBanner userRole={userRole} requiredRole="judge" onElevateRole={onElevateRole} />
+
       {/* Header: Blind Judging Protocol Banner */}
       <div className="bg-gradient-to-r from-card via-surface to-card border border-border/80 rounded-2xl p-6 shadow-glass flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -364,12 +373,27 @@ export const JudgeDashboard: React.FC<JudgeDashboardProps> = ({
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isReadOnly}
+                  title={isReadOnly ? 'Requires Blind Judge role authorization' : undefined}
                   aria-label="Submit score and propagate Z-score normalization"
-                  className="py-3 px-6 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-glow-primary flex items-center justify-center space-x-2 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary"
+                  className={`py-3 px-6 rounded-xl font-bold text-sm transition-all flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary ${
+                    isReadOnly
+                      ? 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+                      : 'bg-primary hover:bg-primary-hover text-white shadow-glow-primary'
+                  }`}
                 >
-                  <Send className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Normalizing Score...' : 'Submit & Propagate to Leaderboard'}</span>
+                  {isReadOnly ? (
+                    <Lock className="w-4 h-4 text-amber-400" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  <span>
+                    {isReadOnly
+                      ? 'Submit Score (Requires Judge Authorization)'
+                      : isSubmitting
+                      ? 'Normalizing Score...'
+                      : 'Submit & Propagate to Leaderboard'}
+                  </span>
                 </button>
               </div>
             </form>

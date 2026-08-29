@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
-import { Attendee, Team, Submission, Announcement, JoinRequest } from '../../types';
+import { Attendee, Team, Submission, Announcement, JoinRequest, Role } from '../../types';
 import { calculateSkillMatch } from '../../utils/math';
 import { QRScannerModal } from './QRScannerModal';
+import { RoleGuardBanner } from '../Auth/RoleGuardBanner';
 import {
   QrCode,
   CheckCircle2,
@@ -21,7 +22,8 @@ import {
   Camera,
   Search,
   Filter,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 
 interface ParticipantDashboardProps {
@@ -30,6 +32,8 @@ interface ParticipantDashboardProps {
   submissions: Submission[];
   announcements: Announcement[];
   joinRequests: JoinRequest[];
+  userRole?: Role;
+  onElevateRole?: (newRole: Role) => void;
   onVerifyCheckin: (attendeeId: string) => void;
   onRequestJoinTeam: (teamId: string, attendeeId: string) => void;
   onSubmitProject: (payload: {
@@ -47,10 +51,13 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
   submissions,
   announcements,
   joinRequests,
+  userRole = 'participant',
+  onElevateRole,
   onVerifyCheckin,
   onRequestJoinTeam,
   onSubmitProject,
 }) => {
+  const isReadOnly = userRole !== 'participant' && userRole !== 'demo';
   const [activeTab, setActiveTab] = useState<'discovery' | 'submission' | 'announcements'>('discovery');
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -122,6 +129,9 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
+      {/* Role Access Authorization Banner */}
+      <RoleGuardBanner userRole={userRole} requiredRole="participant" onElevateRole={onElevateRole} />
+
       {/* Camera Scanner Modal */}
       {showScannerModal && (
         <QRScannerModal
@@ -626,10 +636,16 @@ export const ParticipantDashboard: React.FC<ParticipantDashboardProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all shadow-glow-primary flex items-center justify-center space-x-2"
+              disabled={isReadOnly}
+              title={isReadOnly ? 'Requires Participant role authorization' : undefined}
+              className={`w-full py-3 px-6 rounded-xl font-bold text-sm transition-all flex items-center justify-center space-x-2 ${
+                isReadOnly
+                  ? 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+                  : 'bg-primary hover:bg-primary-hover text-white shadow-glow-primary'
+              }`}
             >
-              <Send className="w-4 h-4" />
-              <span>Mutate Graph Node — Submit Project</span>
+              {isReadOnly ? <Lock className="w-4 h-4 text-amber-400" /> : <Send className="w-4 h-4" />}
+              <span>{isReadOnly ? 'Submit Project (Requires Participant Authorization)' : 'Mutate Graph Node — Submit Project'}</span>
             </button>
           </form>
         </div>

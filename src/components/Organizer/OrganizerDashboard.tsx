@@ -7,8 +7,10 @@ import {
   Score,
   Announcement,
   GraphEvent,
-  LeaderboardEntry
+  LeaderboardEntry,
+  Role
 } from '../../types';
+import { RoleGuardBanner } from '../Auth/RoleGuardBanner';
 import { expandAnnouncementWithGemini } from '../../services/geminiService';
 import {
   ResponsiveContainer,
@@ -45,7 +47,8 @@ import {
   QrCode,
   UserCheck,
   Clock,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 
 interface OrganizerDashboardProps {
@@ -56,6 +59,8 @@ interface OrganizerDashboardProps {
   announcements: Announcement[];
   events: GraphEvent[];
   leaderboard: LeaderboardEntry[];
+  userRole?: Role;
+  onElevateRole?: (newRole: Role) => void;
   onCreateAnnouncement: (payload: {
     text: string;
     bulletPoints?: string;
@@ -73,9 +78,12 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
   announcements,
   events,
   leaderboard,
+  userRole = 'organizer',
+  onElevateRole,
   onCreateAnnouncement,
   onVerifyCheckin,
 }) => {
+  const isReadOnly = userRole !== 'organizer' && userRole !== 'demo';
   const [activeOrgTab, setActiveOrgTab] = useState<'leaderboard' | 'attendance'>('leaderboard');
   const [showOrgScannerModal, setShowOrgScannerModal] = useState(false);
   const [attendeeSearchTerm, setAttendeeSearchTerm] = useState('');
@@ -178,6 +186,9 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-8 animate-slide-up">
+      {/* Role Access Authorization Banner */}
+      <RoleGuardBanner userRole={userRole} requiredRole="organizer" onElevateRole={onElevateRole} />
+
       {/* Camera QR Scanner Modal for Organizer */}
       {showOrgScannerModal && (
         <QRScannerModal
@@ -241,11 +252,17 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
         <button
           onClick={() => setShowOrgScannerModal(true)}
+          disabled={isReadOnly}
+          title={isReadOnly ? 'Requires Organizer permissions to scan QR badges' : 'Scan Attendee QR Badge with Camera'}
           aria-label="Scan Attendee QR Badge with Camera"
-          className="py-2 px-4 rounded-xl bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white font-bold text-xs transition-all shadow-glow-accent flex items-center justify-center space-x-2 cursor-pointer"
+          className={`py-2 px-4 rounded-xl text-xs transition-all flex items-center justify-center space-x-2 ${
+            isReadOnly
+              ? 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+              : 'bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white font-bold shadow-glow-accent cursor-pointer'
+          }`}
         >
-          <Camera className="w-4 h-4" />
-          <span>Scan Attendee QR Badge</span>
+          {isReadOnly ? <Lock className="w-4 h-4 text-amber-400" /> : <Camera className="w-4 h-4" />}
+          <span>{isReadOnly ? 'Scan Badge (Requires Organizer)' : 'Scan Attendee QR Badge'}</span>
         </button>
       </div>
 
@@ -717,11 +734,17 @@ export const OrganizerDashboard: React.FC<OrganizerDashboardProps> = ({
 
               <button
                 type="submit"
+                disabled={isReadOnly}
+                title={isReadOnly ? 'Requires Organizer role authorization' : undefined}
                 aria-label="Publish announcement to live graph"
-                className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-all shadow-glow-primary flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary"
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary ${
+                  isReadOnly
+                    ? 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+                    : 'bg-primary hover:bg-primary-hover text-white shadow-glow-primary'
+                }`}
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Publish Announcement Node</span>
+                {isReadOnly ? <Lock className="w-3.5 h-3.5 text-amber-400" /> : <Send className="w-3.5 h-3.5" />}
+                <span>{isReadOnly ? 'Publish (Requires Organizer Authorization)' : 'Publish Announcement Node'}</span>
               </button>
             </form>
           </div>

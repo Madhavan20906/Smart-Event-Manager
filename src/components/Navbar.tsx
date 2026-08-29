@@ -1,9 +1,10 @@
 import React from 'react';
 import { Role, Attendee } from '../types';
-import { Activity, Shield, Users, Award, Radio, RefreshCw, Layers, LogOut, Sparkles } from 'lucide-react';
+import { Activity, Shield, Users, Award, Radio, RefreshCw, Layers, LogOut, Sparkles, Lock } from 'lucide-react';
 
 interface NavbarProps {
   activeRole: Role;
+  userRole?: Role;
   onRoleChange: (role: Role) => void;
   eventCount: number;
   onResetData: () => void;
@@ -15,6 +16,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeRole,
+  userRole = 'participant',
   onRoleChange,
   eventCount,
   onResetData,
@@ -61,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Active Authenticated Node User Badge */}
           {currentUser && (
-            <div className="flex items-center space-x-2.5 px-3 py-1.5 rounded-xl bg-card border border-border text-xs shadow-sm">
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-card border border-border text-xs shadow-sm">
               <div className="w-6 h-6 rounded-full overflow-hidden bg-primary/20 border border-primary/30 shrink-0">
                 <img
                   src={currentUser.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${currentUser.name}`}
@@ -69,13 +71,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="font-bold text-white font-sans truncate max-w-[120px]">{currentUser.name}</span>
+              <span className="font-bold text-white font-sans truncate max-w-[100px]">{currentUser.name}</span>
+              <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-primary/20 text-primary border border-primary/30 uppercase">
+                {userRole}
+              </span>
               {onLogout && (
                 <button
                   onClick={onLogout}
                   title="Logout & Switch Account Node"
                   aria-label="Logout and switch authenticated identity node"
-                  className="flex items-center space-x-1 px-2 py-0.5 rounded-lg bg-danger/15 hover:bg-danger/30 border border-danger/40 text-danger-light text-[11px] font-mono font-semibold transition-all focus-visible:ring-2 focus-visible:ring-primary ml-1"
+                  className="flex items-center space-x-1 px-1.5 py-0.5 rounded-lg bg-danger/15 hover:bg-danger/30 border border-danger/40 text-danger-light text-[10px] font-mono font-semibold transition-all focus-visible:ring-2 focus-visible:ring-primary ml-0.5"
                 >
                   <LogOut className="w-3 h-3" />
                   <span>Logout</span>
@@ -101,36 +106,51 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onRoleChange('participant')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeRole === 'participant'
-                  ? 'bg-primary text-white shadow-glow-primary'
+                  ? 'bg-primary text-white shadow-glow-primary font-bold'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
               }`}
             >
               <Users className="w-3.5 h-3.5" />
               <span>Participant</span>
+              {userRole !== 'participant' && userRole !== 'demo' && (
+                <span title="Read-Only Mode for your current authenticated role">
+                  <Lock className="w-3 h-3 text-amber-400" />
+                </span>
+              )}
             </button>
 
             <button
               onClick={() => onRoleChange('judge')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeRole === 'judge'
-                  ? 'bg-primary text-white shadow-glow-primary'
+                  ? 'bg-primary text-white shadow-glow-primary font-bold'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
               }`}
             >
               <Award className="w-3.5 h-3.5" />
               <span>Blind Judge</span>
+              {userRole !== 'judge' && userRole !== 'demo' && (
+                <span title="Read-Only Mode for your current authenticated role">
+                  <Lock className="w-3 h-3 text-amber-400" />
+                </span>
+              )}
             </button>
 
             <button
               onClick={() => onRoleChange('organizer')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeRole === 'organizer'
-                  ? 'bg-primary text-white shadow-glow-primary'
+                  ? 'bg-primary text-white shadow-glow-primary font-bold'
                   : 'text-gray-400 hover:text-gray-200 hover:bg-surface-hover'
               }`}
             >
               <Shield className="w-3.5 h-3.5" />
               <span>Organizer</span>
+              {userRole !== 'organizer' && userRole !== 'demo' && (
+                <span title="Read-Only Mode for your current authenticated role">
+                  <Lock className="w-3 h-3 text-amber-400" />
+                </span>
+              )}
             </button>
 
             <button

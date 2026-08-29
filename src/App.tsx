@@ -87,6 +87,19 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleElevateUserRole = (newRole: Role) => {
+    if (!authenticatedUser) return;
+    const updatedUser = { ...authenticatedUser, role: newRole };
+    setAuthenticatedUser(updatedUser);
+    try {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+    } catch (err) {
+      console.warn('Failed to update auth storage:', err);
+    }
+    eventGraphStore.registerOrLoginUser(updatedUser);
+    eventGraphStore.setActiveRole(newRole);
+  };
+
   const currentAttendee =
     storeState.attendees.find(a => a.id === storeState.currentUserId) || storeState.attendees[0];
   const currentJudge =
@@ -104,6 +117,7 @@ export const App: React.FC = () => {
           {/* Top Header Navigation */}
           <Navbar
             activeRole={storeState.activeRole}
+            userRole={authenticatedUser.role}
             onRoleChange={(role: Role) => eventGraphStore.setActiveRole(role)}
             eventCount={storeState.events.length}
             onResetData={() => eventGraphStore.resetStore()}
@@ -122,6 +136,8 @@ export const App: React.FC = () => {
             submissions={storeState.submissions}
             announcements={storeState.announcements}
             joinRequests={storeState.joinRequests}
+            userRole={authenticatedUser.role}
+            onElevateRole={handleElevateUserRole}
             onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
             onRequestJoinTeam={(tId, aId) => eventGraphStore.requestJoinTeam(tId, aId)}
             onSubmitProject={payload => eventGraphStore.updateSubmission(payload)}
@@ -134,6 +150,8 @@ export const App: React.FC = () => {
             submissions={storeState.submissions}
             scores={storeState.scores}
             teams={storeState.teams}
+            userRole={authenticatedUser.role}
+            onElevateRole={handleElevateUserRole}
             onSubmitScore={payload => eventGraphStore.submitScore(payload)}
           />
         )}
@@ -147,6 +165,8 @@ export const App: React.FC = () => {
             announcements={storeState.announcements}
             events={storeState.events}
             leaderboard={leaderboard}
+            userRole={authenticatedUser.role}
+            onElevateRole={handleElevateUserRole}
             onCreateAnnouncement={payload => eventGraphStore.createAnnouncement(payload)}
             onVerifyCheckin={id => eventGraphStore.verifyCheckin(id)}
           />
