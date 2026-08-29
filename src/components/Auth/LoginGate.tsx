@@ -15,7 +15,8 @@ import {
   Cpu,
   Fingerprint,
   Radio,
-  Check
+  Check,
+  Zap
 } from 'lucide-react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
@@ -434,6 +435,25 @@ export const LoginGate: React.FC<LoginGateProps> = ({ onAuthenticate }) => {
                     : 'Authenticate Encrypted Session & Enter'}
                 </span>
               </button>
+
+              <div className="pt-2 border-t border-border/60">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleExecuteAuth({
+                      name: 'Alex Chen (You)',
+                      email: 'alex@eventpulse.io',
+                      role: selectedRole,
+                      skills: ['React', 'TypeScript', 'Tailwind CSS', 'AI Prompting'],
+                    });
+                  }}
+                  aria-label="Instant Guest Demo Access without logging in"
+                  className="w-full py-2.5 px-4 rounded-xl bg-surface hover:bg-surface-hover border border-border text-gray-300 hover:text-white font-mono text-xs transition-all flex items-center justify-center space-x-2 focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <Zap className="w-4 h-4 text-warning animate-pulse" />
+                  <span>⚡ Instant Guest Demo Access (0-Click Bypass)</span>
+                </button>
+              </div>
             </form>
           </div>
         )}

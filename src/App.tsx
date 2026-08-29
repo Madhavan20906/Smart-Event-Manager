@@ -97,22 +97,24 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-gray-100 flex flex-col font-sans selection:bg-primary selection:text-white">
       {/* Login Gate Authorization Check */}
-      {!authenticatedUser && <LoginGate onAuthenticate={handleAuthenticate} />}
+      {!authenticatedUser ? (
+        <LoginGate onAuthenticate={handleAuthenticate} />
+      ) : (
+        <>
+          {/* Top Header Navigation */}
+          <Navbar
+            activeRole={storeState.activeRole}
+            onRoleChange={(role: Role) => eventGraphStore.setActiveRole(role)}
+            eventCount={storeState.events.length}
+            onResetData={() => eventGraphStore.resetStore()}
+            checkedInCount={checkedInCount}
+            totalAttendees={storeState.attendees.length}
+            currentUser={currentAttendee}
+            onLogout={handleLogout}
+          />
 
-      {/* Top Header Navigation */}
-      <Navbar
-        activeRole={storeState.activeRole}
-        onRoleChange={(role: Role) => eventGraphStore.setActiveRole(role)}
-        eventCount={storeState.events.length}
-        onResetData={() => eventGraphStore.resetStore()}
-        checkedInCount={checkedInCount}
-        totalAttendees={storeState.attendees.length}
-        currentUser={currentAttendee}
-        onLogout={handleLogout}
-      />
-
-      {/* Main Content Area */}
-      <main className="flex-1 pb-12">
+          {/* Main Content Area */}
+          <main className="flex-1 pb-12">
         {storeState.activeRole === 'participant' && (
           <ParticipantDashboard
             currentAttendee={currentAttendee}
@@ -193,6 +195,8 @@ export const App: React.FC = () => {
           </div>
         </div>
       </footer>
+        </>
+      )}
     </div>
   );
 };
